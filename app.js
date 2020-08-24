@@ -1,30 +1,35 @@
-const puppet = require('puppeteer');
-
+const puppet = require("puppeteer");
 
 const scraper = async () => {
-    const browser = await puppet.launch({headless:false,defaultViewport:null});
+  const browser = await puppet.launch({
+    headless: false,
+    defaultViewport: null,
+  });
+  const tab1 = await browser.newPage();
+  await tab1.goto("https://www.imdb.com/title/tt7059844/fullcredits");
+  await tab1.waitFor(".cast_list");
 
-    const tab1 = await browser.newPage();
+  let nameData = await tab1.evaluate(() => {
+    const names = [];
+    let rows = Array.from(
+      document.querySelectorAll("table[class='cast_list']>tbody>tr")
+    );
+    rows.forEach((ele) => {
+      let nameJson = {};
+      try {
+        nameJson.name = ele.querySelector("td:nth-child(2)").innerText;
+        nameJson.character = ele.querySelector("td:nth-child(4)").innerText;
+      } catch (exception) {}
+      if (nameJson.name !== null) {
+        names.push(nameJson);
+      }
+    });
+    return names;
+  });
 
-    await tab1.goto("https://www.imdb.com/title/tt7059844/fullcredits");
+  console.table(nameData);
+  console.log(nameData.length);
+  browser.close();
+};
 
-    await tab1.waitFor(".cast_list");
-
-    const result = await tab1.evaluate(() => {
-        const rows = document.querySelectorAll(
-          'table[class="cast_list"]>tbody>tr'
-        );
-        elementArray = Array.from(rows);
-
-        return elementArray.map(row => {
-            let char = document.querySelector('.character').innerText
-            return char
-        })
-    })
-    
-    console.log(result);
-
-    browser.close()
-}
-
-scraper()
+scraper();

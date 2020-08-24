@@ -11,16 +11,15 @@ const scraper = async () => {
 
   let nameData = await tab1.evaluate(() => {
     const names = [];
-    let rows = Array.from(
-      document.querySelectorAll("table[class='cast_list']>tbody>tr")
-    );
+    let rows = document.querySelectorAll("table[class='cast_list']>tbody>tr");
+
     rows.forEach((ele) => {
       let nameJson = {};
       try {
         nameJson.name = ele.querySelector("td:nth-child(2)").innerText;
         nameJson.character = ele.querySelector("td:nth-child(4)").innerText;
       } catch (exception) {}
-      if (nameJson.name !== null) {
+      if (nameJson.name) {
         names.push(nameJson);
       }
     });
